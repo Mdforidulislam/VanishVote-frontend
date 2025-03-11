@@ -1,16 +1,29 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import InputField from "../Components/ui/Input";
-import { label } from "framer-motion/client";
 import PollModal from "../Components/modal/Modal";
+
+type PollType = "checkbox" | "yesno";
+
+type Poll = {
+  id: number;
+  question: string;
+  options: string[];
+  likes: number;
+  comments: number;
+  shares: number;
+};
+
+type SelectedPollOptions = {
+  [key: number]: string[];
+};
 
 const PollListPage = () => {
   const [showModal, setShowModal] = useState(false);
-  const [pollType, setPollType] = useState<'checkbox' | 'yesno'>('checkbox'); // Default type to checkbox
-  const [selectedPollOptions, setSelectedPollOptions] = useState({}); // Store selected options for each poll
+  const [pollType, setPollType] = useState<PollType>("checkbox"); // Default type to checkbox
+  const [selectedPollOptions, setSelectedPollOptions] = useState<SelectedPollOptions>({}); // Store selected options for each poll
 
   // Fake data for demonstration
-  const fakePolls = [
+  const fakePolls: Poll[] = [
     {
       id: 1,
       question: "What's your favorite programming language?",
@@ -29,13 +42,14 @@ const PollListPage = () => {
     },
   ];
 
-  const handleOptionChange = (pollId, option) => {
+  const handleOptionChange = (pollId: number, option: string) => {
     setSelectedPollOptions((prevState) => {
       const updated = { ...prevState };
-      if (pollType === 'checkbox') {
+      if (pollType === "checkbox") {
         updated[pollId] = updated[pollId] ? [...updated[pollId], option] : [option];
       } else {
         updated[pollId] = [option]; // Only allow one option for yes/no
+        setPollType("checkbox")
       }
       return updated;
     });
@@ -58,7 +72,7 @@ const PollListPage = () => {
                 <div key={index} className="flex justify-between items-center">
                   <label className="text-gray-600 flex items-center">
                     <input
-                      type={pollType === 'checkbox' ? "checkbox" : "radio"}
+                      type={pollType === "checkbox" ? "checkbox" : "radio"}
                       name={`poll-${poll.id}`}
                       value={option}
                       checked={selectedPollOptions[poll.id]?.includes(option) || false}
@@ -68,17 +82,24 @@ const PollListPage = () => {
                     {option}
                   </label>
                   <div className="w-24 h-2 bg-gray-200 rounded-full">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(Math.random() * 100).toFixed(0)}%` }}></div>
+                    <div
+                      className="bg-purple-500 h-2 rounded-full"
+                      style={{ width: `${(Math.random() * 100).toFixed(0)}%` }}
+                    ></div>
                   </div>
                 </div>
               ))}
             </div>
             <div className="flex justify-between items-center mt-4 text-sm text-gray-500">
               <div className="flex items-center space-x-2">
-              <Link to={`/poll/${poll.id}`} className="text-blue-500"><span className="cursor-pointer">Comment {poll.comments}</span></Link>
+                <Link to={`/poll/${poll.id}`} className="text-blue-500">
+                  <span className="cursor-pointer">Comment {poll.comments}</span>
+                </Link>
                 <span className="cursor-pointer">Share {poll.shares}</span>
               </div>
-              <Link to={`/poll/${poll.id}`} className="text-blue-500">View Details</Link>
+              <Link to={`/poll/${poll.id}`} className="text-blue-500">
+                View Details
+              </Link>
             </div>
           </div>
         ))}
@@ -93,9 +114,7 @@ const PollListPage = () => {
           Create Poll
         </button>
 
-        {
-           showModal &&  <PollModal setShowModal={setShowModal}/> 
-        }
+        {showModal && <PollModal setShowModal={setShowModal} />}
       </div>
     </div>
   );
